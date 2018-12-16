@@ -71,6 +71,10 @@ class Register extends React.Component {
     }
   }
 
+  handleInputError = (errors, inputError) => {
+    return errors.some(error => error.message.toLowerCase().includes(inputError)) ? 'error' : '';
+  }
+
   render() {
     const { username, email, password, passwordConfirmation, errors, loading } = this.state;
 
@@ -87,13 +91,16 @@ class Register extends React.Component {
               placeholder="Username" onChange={this.handleChange} type="text" value={username}/>
 
               <Form.Input fluid name="email" icon="mail" iconPosition="left"
-              placeholder="Email Address" onChange={this.handleChange} type="email" value={email}/>
+              placeholder="Email Address" onChange={this.handleChange} type="email" value={email} 
+              className={this.handleInputError(errors, 'email')}/>
 
               <Form.Input fluid name="password" icon="lock" iconPosition="left"
-              placeholder="Password" onChange={this.handleChange} type="password" value={password}/>
+              placeholder="Password" onChange={this.handleChange} type="password" value={password}
+              className={this.handleInputError(errors, 'password')}/>
 
               <Form.Input fluid name="passwordConfirmation" icon="repeat" iconPosition="left"
-              placeholder="Password Confirmation" onChange={this.handleChange} type="password" value={passwordConfirmation}/>
+              placeholder="Password Confirmation" onChange={this.handleChange} type="password" value={passwordConfirmation}
+              className={this.handleInputError(errors, 'password')}/>
 
               <Button disabled={loading} className={loading ? 'loading' : ''} color="orange" fluid size="large">Submit</Button>
             </Segment>
