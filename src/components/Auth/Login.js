@@ -15,7 +15,7 @@ class Login extends React.Component {
     this.setState({ [event.target.name]: event.target.value })
   }
 
-  isFormValid = (email, password) => email && password;
+  isFormValid = ({ email, password }) => email && password;
 
   displayErrors = errors => {
     return errors.map((error, i) => <p key={i}>{error.message}</p>);
@@ -25,7 +25,21 @@ class Login extends React.Component {
     event.preventDefault();
     
     if (this.isFormValid(this.state)) {
-      
+      this.setState({ errors: [], loading: true });
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(this.state.email, this.state.password)
+        .then(signedInUser => {
+          console.log(signedInUser);
+          this.setState({ loading: false });
+        })
+        .catch(err => {
+          console.error(err);
+          this.setState({
+            errors: this.state.errors.concat(err),
+            loading: false,
+          });
+        })
     }
   }
 
