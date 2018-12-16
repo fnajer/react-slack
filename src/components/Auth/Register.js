@@ -12,6 +12,7 @@ class Register extends React.Component {
     passwordConfirmation: '',
     errors: [],
     loading: false,
+    usersRef: firebase.database().ref('users'),
   };
 
   handleChange = event => {
@@ -70,8 +71,14 @@ class Register extends React.Component {
               photoURL: `http://gravatar.com/avatar/${md5(createdUser.user.email)}?d=identicon`,
             })
             .then(() => {
-              
-              this.setState({ loading: false });
+              this.saveUser(createdUser)
+                .then(() => {
+                  this.setState({ loading: false });
+                })
+                .catch(err => {
+                  console.log(err);
+                  this.setState({ errors: this.state.errors.concat(err), loading: false });
+                });
             })
             .catch(err => {
               console.log(err);
@@ -83,6 +90,13 @@ class Register extends React.Component {
           this.setState({ errors: this.state.errors.concat(err), loading: false });
         });
     }
+  }
+
+  saveUser = createdUser => {
+    return this.state.usersRef.child(createdUser.user.uid).set({
+      name: createdUser.user.displayName,
+      avatar: createdUser.user.photoURL,
+    });
   }
 
   handleInputError = (errors, inputError) => {
