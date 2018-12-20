@@ -17,9 +17,22 @@ class Channels extends React.Component {
 
     this.state.channelsRef.on('child_added', snap => {
       loadedChannels.push(snap.val());
-      console.log(loadedChannels);
+      this.setState({ channels: loadedChannels });
     });
   }
+
+  displayChannels = channels => (
+    channels.length > 0 && channels.map(channel => (
+      <Menu.Item
+        key={channel.id}
+        onClick={() => console.log(channel)}
+        name={channel.name}
+        style={{ opacity: 0.7 }}
+      >
+        # {channel.name}
+      </Menu.Item>
+    ))
+  )
 
   openModal = () => this.setState({ modal: true })
   closeModal = () => this.setState({ modal: false })
@@ -75,6 +88,7 @@ class Channels extends React.Component {
           </Menu.Item>
 
           {/* CHANNELS */}
+          {this.displayChannels(channels)}
         </Menu.Menu>
 
         {/* Add Channel Modal */}
