@@ -12,6 +12,15 @@ class Channels extends React.Component {
     user: this.props.currentUser,
   }
 
+  componentDidMount() {
+    const loadedChannels = [];
+
+    this.state.channelsRef.on('child_added', snap => {
+      loadedChannels.push(snap.val());
+      console.log(loadedChannels);
+    });
+  }
+
   openModal = () => this.setState({ modal: true })
   closeModal = () => this.setState({ modal: false })
 
