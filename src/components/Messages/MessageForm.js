@@ -85,22 +85,9 @@ class MessageForm extends React.Component {
       uploadTask: this.state.storageRef.child(filePath).put(file, metadata),
     },
     () => {
-      this.state.storageRef.on('state_changed', snap => {
-        const percentUploaded = Math.round(snap.bytesTransferred / snap.totalBytes) * 100;
+      this.state.uploadTask.on('state_changed', snap => {
+        const percentUploaded = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
         this.setState({ percentUploaded });
-      });
-    },
-    err => {
-      console.error(err);
-      this.setState({
-        errors: this.state.errors.concat(err),
-        uploadState: 'error',
-        uploadTask: null,
-      });
-    },
-    () => {
-      this.state.uploadTask.snapshot.ref.getDownoloadURL().then(downoloadUrl => {
-        this.sendFileMessage(downoloadUrl, ref, pathToUpload);
       },
       err => {
         console.error(err);
@@ -109,13 +96,30 @@ class MessageForm extends React.Component {
           uploadState: 'error',
           uploadTask: null,
         });
-      });
+      },
+      () => {
+        this.state.uploadTask.snapshot.ref.getDownloadURL()
+          .then(downloadUrl => {
+            console.log(downloadUrl);
+            this.sendFileMessage(downloadUrl, ref, pathToUpload);
+          })
+          .catch(err => {
+            console.error(err);
+            this.setState({
+              errors: this.state.errors.concat(err),
+              uploadState: 'error',
+              uploadTask: null,
+            });
+          });
+        }
+     );
     });
   }
 
   sendFileMessage = (fileUrl, ref, pathToUpload) => {
     ref
       .child(pathToUpload)
+      .push()
       .set(this.createMessage(fileUrl))
       .then(() => {
         this.setState({
