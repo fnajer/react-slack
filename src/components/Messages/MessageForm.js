@@ -4,6 +4,7 @@ import { Segment, Input, Button } from 'semantic-ui-react';
 import firebase from '../../firebase';
 
 import FileModal from './FileModal';
+import ProgressBar from './ProgressBar';
 
 class MessageForm extends React.Component {
   state = {
@@ -134,7 +135,8 @@ class MessageForm extends React.Component {
   }
 
   render() {
-    const { errors, message, loading, modal } = this.state;
+    // prettier-ignore
+    const { errors, message, loading, modal, uploadState, percentUploaded } = this.state;
 
     return (
       <Segment className="message__form">
@@ -171,6 +173,10 @@ class MessageForm extends React.Component {
           modal={modal}
           closeModal={this.closeModal}
           uploadFile={this.uploadFile}
+        />
+        <ProgressBar
+          uploadState={uploadState}
+          percentUploaded={percentUploaded}
         />
       </Segment>
     );
