@@ -10,6 +10,7 @@ class Messages extends React.Component {
     messagesRef: firebase.database().ref('messages'),
     messages: [],
     messagesLoading: true,
+    progressBar: false,
   }
 
   componentDidMount() {
@@ -46,8 +47,17 @@ class Messages extends React.Component {
     ))
   )
 
+  isProgressBarVisible = percent => {
+    if (percent > 0) {
+      this.setState({ progressBar: true });
+    }
+    if (percent === 100) {
+      this.setState({ progressBar: false });
+    }
+  }
+
   render() {
-    const { messagesRef, messages } = this.state;
+    const { messagesRef, messages, progressBar } = this.state;
     const { currentChannel, currentUser } = this.props;
 
     return (
@@ -55,7 +65,7 @@ class Messages extends React.Component {
         <MessagesHeader />
 
         <Segment>
-          <Comment.Group className="messages">
+          <Comment.Group className={progressBar ? 'messages__progress' : 'messages'}>
             {this.displayMessages(messages, currentUser)}
           </Comment.Group>
         </Segment>
@@ -64,6 +74,7 @@ class Messages extends React.Component {
           messagesRef={messagesRef}
           currentChannel={currentChannel}
           currentUser={currentUser}
+          isProgressBarVisible={this.isProgressBarVisible}
         />
       </React.Fragment>
     )
