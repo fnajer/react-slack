@@ -61,11 +61,14 @@ class DirectMessages extends Component {
       if (user.uid === userId) {
         user['status'] = `${connected ? 'online' : 'offline'}`;
       }
-      acc.concet(user);
+
+      return acc.concat(user);
     }, []);
-    
+
     this.setState({ users: updatedUsers });
   }
+
+  isUserOnline = user => user.status === 'online';
 
   render() {
     const { users } = this.state;
@@ -79,6 +82,21 @@ class DirectMessages extends Component {
           ({users.length})
         </Menu.Item>
         {/* Users to Send Direct Messages */}
+        {
+          users.map(user => (
+            <Menu.Item
+              key={user.uid}
+              onClick={() => console.log(user)}
+              style={{ opacity: 0.7, fontStyle: 'italic' }}
+            >
+              <Icon
+                name="circle"
+                color={this.isUserOnline(user) ? 'green' : 'red'}
+              />
+              @ {user.name}
+            </Menu.Item>
+          ))
+        }
       </Menu.Menu>
     )
   }
