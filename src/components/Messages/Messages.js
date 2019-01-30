@@ -8,6 +8,7 @@ import Message from './Message';
 class Messages extends React.Component {
   state={
     isPrivateChannel: this.props.isPrivateChannel,
+    usersRef: firebase.database().ref('users'),
     privateMessagesRef: firebase.database().ref('privateMessages'),
     messagesRef: firebase.database().ref('messages'),
     messages: [],
@@ -117,10 +118,30 @@ class Messages extends React.Component {
   }
 
   starChannel = () => {
+    const { currentUser, currentChannel } = this.props;
+
     if (this.state.isChannelStarred) {
-      console.log('starred');
+      this.state.usersRef
+        .child(`${currentUser.uid}/starred`)
+        .update({
+          [currentChannel.id]: {
+            name: currentChannel.name,
+            details: currentChannel.details,
+            createdBy: {
+              name: currentChannel.createdBy.name,
+              avatar: currentChannel.createdBy.avatar,
+            },
+          }
+        });
     } else {
-      console.log('unstarred');
+      this.state.usersRef
+        .child(`${currentUser.uid}/starred`)
+        .child(currentChannel.id)
+        .remove(err => {
+          if (err !== null) {
+            console.log(err);
+          }
+        });
     }
   }
 
