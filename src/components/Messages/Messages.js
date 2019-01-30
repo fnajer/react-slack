@@ -26,7 +26,22 @@ class Messages extends React.Component {
 
     if (currentChannel && currentUser) {
       this.addListeners(currentChannel.id);
+      this.addUserStarsListener(currentChannel.id, currentUser.uid);
     }
+  }
+
+  addUserStarsListener = (channelId, userId) => {
+    this.state.usersRef
+      .child(`${userId}/starred`)
+      .once('value')
+      .then(data => {
+        if (data.val() !== null) {
+          console.log(data.val());
+          const channelIds = Object.keys(data.val());
+          const prevStarred = channelIds.includes(channelId);
+          this.setState({ isChannelStarred: prevStarred });
+        }
+      });
   }
 
   addListeners = channelId => {
