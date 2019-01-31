@@ -1,5 +1,7 @@
 import React from "react";
 import firebase from '../../firebase';
+import { connect } from 'react-redux';
+import { setUserPosts } from '../../actions';
 import { Segment, Comment } from 'semantic-ui-react';
 import MessagesHeader from './MessagesHeader';
 import MessageForm from './MessageForm';
@@ -75,8 +77,8 @@ class Messages extends React.Component {
       }
       return acc;
     }, {});
-    console.log(userPosts);
-    
+
+    this.props.setUserPosts(userPosts);
   }
 
   getMessagesRef = () => {
@@ -212,4 +214,4 @@ class Messages extends React.Component {
   }
 }
 
-export default Messages;
+export default connect(null, { setUserPosts })(Messages);
