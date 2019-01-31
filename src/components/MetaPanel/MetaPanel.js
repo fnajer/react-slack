@@ -1,5 +1,5 @@
 import React from "react";
-import { Segment, Header, Accordion, Icon, Image } from 'semantic-ui-react';
+import { Segment, Header, Accordion, Icon, Image, List } from 'semantic-ui-react';
 
 class MetaPanel extends React.Component {
   state={
@@ -15,8 +15,27 @@ class MetaPanel extends React.Component {
     this.setState({ activeIndex: newIndex });
   }
 
+  displayTopPosters = posts => (
+    Object.entries(posts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([key, val], i) => (
+        <List.Item key={i}>
+          <Image avatar src={val.avatar}/>
+          <List.Content>
+            <List.Header as='a'>
+              {key}
+            </List.Header>
+            <List.Description>
+              {val.count}
+            </List.Description>
+          </List.Content>
+        </List.Item>
+      ))
+  )
+
   render() {
     const { activeIndex, isPrivateChannel, channel } = this.state;
+    const { userPosts } = this.props;
 
     if (isPrivateChannel) return null;
 
@@ -52,7 +71,9 @@ class MetaPanel extends React.Component {
           <Accordion.Content
             active={activeIndex === 1}
           >
-            posters
+            <List>
+              {userPosts && this.displayTopPosters(userPosts)}
+            </List>
           </Accordion.Content>
           <Accordion.Title
             active={activeIndex === 2}
