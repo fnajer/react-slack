@@ -8,6 +8,8 @@ class UserPanel extends React.Component {
     user: this.props.currentUser,
     modal: false,
     previewImage: '',
+    croppedImage: '',
+    blob: '',
   }
 
   openModal = () => this.setState({ modal: true });
@@ -48,8 +50,20 @@ class UserPanel extends React.Component {
     }
   }
 
+  handleCropImage = () => {
+    if (this.avatarEditor) {
+      this.avatarEditor.getImageScaledToCanvas().toBlob(blob => {
+        let imageURL = URL.createObjectURL(blob);
+        this.setState({
+          croppedImage: imageURL,
+          blob,
+        });
+      })
+    }
+  }
+
   render() {
-    const { user, modal, previewImage } = this.state;
+    const { user, modal, previewImage, croppedImage } = this.state;
     const { primaryColor } = this.props;
 
     return (
@@ -93,6 +107,7 @@ class UserPanel extends React.Component {
                     {/* Image Preview */}
                     {previewImage && (
                       <AvatarEditor
+                        ref={node => (this.avatarEditor = node)}
                         image={previewImage}
                         width={120}
                         height={120}
@@ -103,15 +118,23 @@ class UserPanel extends React.Component {
                   </Grid.Column>
                   <Grid.Column>
                     {/* Cropped Image Preview */}
+                    {croppedImage && (
+                      <Image
+                        style={{ margin: '3.5em auto'}}
+                        width={100}
+                        height={100}
+                        src={croppedImage}
+                      />
+                    )}
                   </Grid.Column>
                 </Grid.Row>
               </Grid>
             </Modal.Content>
             <Modal.Actions>
-              <Button color="green" inverted>
+              {croppedImage && <Button color="green" inverted>
                 <Icon name="checkmark"/> Change Avatar
-              </Button>
-              <Button color="green" inverted>
+              </Button>}
+              <Button color="green" inverted onClick={this.handleCropImage}>
                 <Icon name="image"/> Preview
               </Button>
               <Button color="red" inverted onClick={this.closeModal}>
