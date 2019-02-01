@@ -1,11 +1,13 @@
 import React from 'react';
 import firebase from '../../firebase';
+import AvatarEditor from 'react-avatar-editor';
 import { Grid, Header, Icon, Dropdown, Image, Modal, Input, Button } from 'semantic-ui-react';
 
 class UserPanel extends React.Component {
   state = {
     user: this.props.currentUser,
     modal: false,
+    previewImage: '',
   }
 
   openModal = () => this.setState({ modal: true });
@@ -34,8 +36,20 @@ class UserPanel extends React.Component {
       .then(() => console.log('signed out'));
   };
 
+  handleChange = event => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    if (file) {
+      reader.readAsDataURL(file);
+      reader.addEventListener('load', () => {
+        this.setState({ previewImage: reader.result });
+      });
+    }
+  }
+
   render() {
-    const { user, modal } = this.state;
+    const { user, modal, previewImage } = this.state;
     const { primaryColor } = this.props;
 
     return (
@@ -71,11 +85,21 @@ class UserPanel extends React.Component {
                 label="New Avatar"
                 type="file"
                 name="previewImage"
+                onChange={this.handleChange}
               />
-              <Grid centered columns={2}>
+              <Grid centered stackable columns={2}>
                 <Grid.Row centered>
                   <Grid.Column className="ui center aligned grid">
                     {/* Image Preview */}
+                    {previewImage && (
+                      <AvatarEditor
+                        image={previewImage}
+                        width={120}
+                        height={120}
+                        border={50}
+                        scale={1.2}
+                      />
+                    )}
                   </Grid.Column>
                   <Grid.Column>
                     {/* Cropped Image Preview */}
