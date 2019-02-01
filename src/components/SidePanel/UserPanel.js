@@ -10,6 +10,11 @@ class UserPanel extends React.Component {
     previewImage: '',
     croppedImage: '',
     blob: '',
+    storageRef: firebase.storage().ref(),
+    userRef: firebase.auth().currentUser,
+    metadata: {
+      contentType: 'image/jpeg'
+    },
   }
 
   openModal = () => this.setState({ modal: true });
@@ -60,6 +65,21 @@ class UserPanel extends React.Component {
         });
       })
     }
+  }
+
+  uploadCroppedImage = () => {
+    const { storageRef, userRef, blob, metadata } = this.state;
+
+    storageRef
+      .child(`avatars/user-${userRef.uid}`)
+      .put(blob, metadata)
+      .then(snap => {
+        snap.ref.getDownloadURL().then(downloadURL => {
+          this.setState({
+            uploadedCroppedImage: downloadURL,
+          });
+        })
+      })
   }
 
   render() {
@@ -131,7 +151,7 @@ class UserPanel extends React.Component {
               </Grid>
             </Modal.Content>
             <Modal.Actions>
-              {croppedImage && <Button color="green" inverted>
+              {croppedImage && <Button color="green" inverted onClick={this.uploadCroppedImage}>
                 <Icon name="checkmark"/> Change Avatar
               </Button>}
               <Button color="green" inverted onClick={this.handleCropImage}>
