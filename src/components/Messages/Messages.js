@@ -22,6 +22,9 @@ class Messages extends React.Component {
     searchLoading: false,
     searchResults: [],
     isChannelStarred: false,
+    typingUsers: [],
+    typingRef: firebase.database().ref('typing'),
+    connectedRef: firebase.database().ref('.info/connected'),
   }
 
   componentDidMount() {
@@ -49,6 +52,48 @@ class Messages extends React.Component {
 
   addListeners = channelId => {
     this.addMessageListener(channelId);
+    this.addTypingListener(channelId);
+  }
+
+  addTypingListener = channelId => {
+    let typingUsers = [];
+    this.state.typingRef
+      .child(channelId)
+      .on('child_added', snap => {
+        if (snap.val() !== this.state.user.uid) {
+          typingUsers = typingUsers.concat({
+            id: snap.key,
+            name: snap.val()
+          });
+          this.setState({ typingUsers }); 
+        }
+      });
+    
+    this.state.typingRef
+      .child(channelId)
+      .on('child_removed', snap => {
+        const index = this.state.typingUsers.findIndex(user => user.id === snap.key);
+
+        if (index !== -1) {
+          typingUsers = typingUsers.filter(user => user.id !== snap.val());
+          this.setState({ typingUsers });
+        }
+      });
+
+    /* if current user leaves from this chat - delete typing info about him */
+    this.state.connectedRef.on('value', snap => {
+      if (snap.val() === true) {
+        this.state.typingRef
+          .child(channelId)
+          .child(this.state.user.uid)
+          .onDisconnect()
+          .remove(err => {
+            if (err !== null) {
+              console.error(err);
+            }
+          });
+      }
+    })
   }
 
   addMessageListener = channelId => {
