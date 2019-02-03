@@ -60,7 +60,7 @@ class Messages extends React.Component {
     this.state.typingRef
       .child(channelId)
       .on('child_added', snap => {
-        if (snap.val() !== this.state.user.uid) {
+        if (snap.key !== this.props.currentUser.uid) {
           typingUsers = typingUsers.concat({
             id: snap.key,
             name: snap.val()
@@ -75,7 +75,7 @@ class Messages extends React.Component {
         const index = this.state.typingUsers.findIndex(user => user.id === snap.key);
 
         if (index !== -1) {
-          typingUsers = typingUsers.filter(user => user.id !== snap.val());
+          typingUsers = typingUsers.filter(user => user.id !== snap.key);
           this.setState({ typingUsers });
         }
       });
@@ -85,7 +85,7 @@ class Messages extends React.Component {
       if (snap.val() === true) {
         this.state.typingRef
           .child(channelId)
-          .child(this.state.user.uid)
+          .child(this.props.currentUser.uid)
           .onDisconnect()
           .remove(err => {
             if (err !== null) {
@@ -225,9 +225,19 @@ class Messages extends React.Component {
     }
   }
 
+  displayTypingUsers = users => (
+    users.length > 0 && users.map(user => (
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.2em' }}
+        key={user.id}
+      >
+        <span className='user__typing'>{user.name} is typing</span> <Typing/>
+      </div>
+    ))
+  )
+
   render() {
     // prettier-ignore
-    const { messages, progressBar, numUniqueUsers, searchLoading, searchTerm, searchResults, isPrivateChannel, isChannelStarred } = this.state;
+    const { messages, progressBar, numUniqueUsers, searchLoading, searchTerm, searchResults, isPrivateChannel, isChannelStarred, typingUsers } = this.state;
     const { currentChannel, currentUser } = this.props;
 
     return (
@@ -245,9 +255,7 @@ class Messages extends React.Component {
         <Segment>
           <Comment.Group className={progressBar ? 'messages__progress' : 'messages'}>
             {searchTerm ? this.displayMessages(searchResults) : this.displayMessages(messages)}
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span className='user__typing'>mool is typing</span> <Typing/>
-            </div>
+            {this.displayTypingUsers(typingUsers)}
           </Comment.Group>
         </Segment>
 
