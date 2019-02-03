@@ -36,13 +36,22 @@ class Messages extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (this.messagesEnd) {
+      this.scrollToBottom();
+    }
+  }
+
+  scrollToBottom = () => {
+    this.messagesEnd.scrollIntoView({ behavior: 'smooth' });
+  }
+
   addUserStarsListener = (channelId, userId) => {
     this.state.usersRef
       .child(`${userId}/starred`)
       .once('value')
       .then(data => {
         if (data.val() !== null) {
-          console.log(data.val());
           const channelIds = Object.keys(data.val());
           const prevStarred = channelIds.includes(channelId);
           this.setState({ isChannelStarred: prevStarred });
@@ -256,6 +265,7 @@ class Messages extends React.Component {
           <Comment.Group className={progressBar ? 'messages__progress' : 'messages'}>
             {searchTerm ? this.displayMessages(searchResults) : this.displayMessages(messages)}
             {this.displayTypingUsers(typingUsers)}
+            {<div ref={node => (this.messagesEnd = node)}></div>}
           </Comment.Group>
         </Segment>
 
