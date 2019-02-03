@@ -219,9 +219,8 @@ class MessageForm extends React.Component {
           label={
             <Button 
               icon={emojiPicker ? 'close' : 'add'}
-              content={emojiPicker ? 'Close' : ''}
+              content={emojiPicker ? 'Close' : null}
               onClick={this.handleTogglePicker}
-
             />
           }
           labelPosition="left"
