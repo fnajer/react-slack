@@ -26,14 +26,38 @@ class Messages extends React.Component {
     typingUsers: [],
     typingRef: firebase.database().ref('typing'),
     connectedRef: firebase.database().ref('.info/connected'),
+    listeners: [],
   }
 
   componentDidMount() {
-    const { currentChannel, currentUser } = this.props;
+    const { currentChannel, currentUser, listeners } = this.props;
 
     if (currentChannel && currentUser) {
+      this.removeListeners(listeners);
       this.addListeners(currentChannel.id);
       this.addUserStarsListener(currentChannel.id, currentUser.uid);
+    }
+  }
+
+  componentWillUnmount() {
+    this.removeListeners(this.state.listeners);
+    this.state.connectedRef.off();
+  }
+
+  removeListeners = listeners => {
+    listeners.forEach(listener => {
+      listener.ref.child(listener.id).off(listener.event);
+    });
+  }
+
+  addToListeners = (id, ref, event) => {
+    const index = this.state.listeners.findIndex(listener => {
+      return listener.id === id && listener.ref === ref && listener.event === event;
+    });
+
+    if (index === -1) {
+      const newListener = { id, ref, event };
+      this.setState({ listeners: this.state.listeners.concat(newListener)});
     }
   }
 
@@ -78,7 +102,8 @@ class Messages extends React.Component {
           this.setState({ typingUsers }); 
         }
       });
-    
+    this.addToListeners(channelId, this.state.typingRef ,'child_added');
+
     this.state.typingRef
       .child(channelId)
       .on('child_removed', snap => {
@@ -89,6 +114,7 @@ class Messages extends React.Component {
           this.setState({ typingUsers });
         }
       });
+    this.addToListeners(channelId, this.state.typingRef ,'child_removed');
 
     /* if current user leaves from this chat - delete typing info about him */
     this.state.connectedRef.on('value', snap => {
@@ -119,6 +145,8 @@ class Messages extends React.Component {
       this.countUniqueUsers(loadedMessages);
       this.countUserPosts(loadedMessages);
     });
+
+    this.addToListeners(channelId, ref,'child_added');
   }
 
   countUserPosts = messages => {
